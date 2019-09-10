@@ -14,6 +14,7 @@ import (
 	"text/template"
 
 	"github.com/go-xorm/core"
+	. "github.com/go-xorm/core"
 )
 
 var (
@@ -21,13 +22,14 @@ var (
 	GoLangTmpl     LangTmpl = LangTmpl{
 		template.FuncMap{"Mapper": mapper.Table2Obj,
 			"Type":       typestring,
+			"DartType":   darttypestring,
 			"Tag":        tag,
 			"UnTitle":    unTitle,
 			"gt":         gt,
 			"getCol":     getCol,
 			"UpperTitle": upTitle,
 		},
-		formatGo,
+		nil,
 		genGoImports,
 	}
 )
@@ -198,6 +200,31 @@ func typestring(col *core.Column) string {
 		return "[]byte"
 	}
 	return s
+}
+
+func darttypestring(col *core.Column) string {
+	name := strings.ToUpper(col.SQLType.Name)
+	result := "String"
+	switch name {
+	case Bit, TinyInt, SmallInt, MediumInt, Int, Integer, Serial:
+		result = "int"
+	case BigInt, BigSerial, Numeric:
+	case Float, Real:
+	case Double, Decimal:
+		return "double"
+	case Char, Varchar, NVarchar, TinyText, Text, NText, MediumText, LongText, Enum, Set, Uuid, Clob, SysName:
+		return "String"
+	case TinyBlob, Blob, LongBlob, Bytea, Binary, MediumBlob, VarBinary, UniqueIdentifier:
+		return "String"
+	case Bool:
+		return "bool"
+	case DateTime, Date, Time, TimeStamp, TimeStampz:
+		return "String"
+
+	default:
+		return "String"
+	}
+	return result
 }
 
 func tag(table *core.Table, col *core.Column) string {
