@@ -51,8 +51,8 @@ func init() {
 }
 
 var (
-	genJson                                      bool     = false
-	ignoreColumnsJSON, created, updated, deleted []string = []string{}, []string{"created_at"}, []string{"updated_at"}, []string{"deleted_at"}
+	genJson                                               bool     = false
+	ignoreColumnsJSON, exclude, created, updated, deleted []string = []string{}, []string{}, []string{"created_at"}, []string{"updated_at"}, []string{"deleted_at"}
 )
 
 func printReversePrompt(flag string) {
@@ -76,6 +76,53 @@ func dirExists(dir string) bool {
 	return true
 }
 
+//过滤exclude字段
+func filterExclude(tables []*core.Table) {
+	for _, t := range tables {
+		var cols = []*core.Column{}
+		for _, col := range t.Columns() {
+			var exists = false
+			// fmt.Println("col=", _index, col.Name)
+			for _, e := range exclude {
+
+				if e == col.Name {
+					// t.DeleteColumns(_index)
+					exists = true
+					break
+				}
+			}
+			if !exists {
+				cols = append(cols, col)
+			}
+		}
+		t.SetColumns(cols)
+
+	}
+}
+func filterExcludeSingleTable(table *core.Table) {
+	//过滤exclude字段
+
+	var cols = []*core.Column{}
+
+	fmt.Println(table.Name)
+	for _, col := range table.Columns() {
+		var exists = false
+		// fmt.Println("col=", _index, col.Name)
+		for _, e := range exclude {
+
+			if e == col.Name {
+				// t.DeleteColumns(_index)
+				exists = true
+				break
+			}
+		}
+		if !exists {
+			cols = append(cols, col)
+		}
+	}
+	table.SetColumns(cols)
+
+}
 func runReverse(cmd *Command, args []string) {
 	num := checkFlags(cmd.Flags, args, printReversePrompt)
 	if num == -1 {
@@ -173,8 +220,12 @@ func runReverse(cmd *Command, args []string) {
 		if j, ok := configs["deleted"]; ok {
 			deleted = strings.Split(j, ",")
 		}
+		if j, ok := configs["exclude"]; ok {
+			exclude = strings.Split(j, ",")
+		}
 
 	}
+	fmt.Println("排除字段:", exclude)
 
 	if langTmpl, ok = langTmpls[lang]; !ok {
 		fmt.Println("Unsupported programing language", lang)
@@ -206,6 +257,7 @@ func runReverse(cmd *Command, args []string) {
 		}
 		tables = tables[:size]
 	}
+	filterExclude(tables)
 
 	filepath.Walk(dir, func(f string, info os.FileInfo, err error) error {
 		if info.IsDir() {
@@ -253,6 +305,13 @@ func runReverse(cmd *Command, args []string) {
 				}
 				tbls = append(tbls, table)
 			}
+
+			// for _, t := range tbls {
+			// 	for _index, col := range t.Columns() {
+			// 		fmt.Println("m tbs's col=", _index, col.Name)
+			// 	}
+			// }
+			// fmt.Println("m var=", imports, model)
 
 			newbytes := bytes.NewBufferString("")
 

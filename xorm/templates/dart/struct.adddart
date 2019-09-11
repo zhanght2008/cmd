@@ -1,0 +1,97 @@
+
+{{range .Tables}}
+import 'package:flutter/material.dart';
+import '../model/app_model.dart';
+import '../constant.dart';
+{{$table := .}}
+class {{Mapper .Name}}AddPage extends StatefulWidget {
+  {{Mapper .Name}}AddPage({this.key}) : super(key: key);
+  final Key key;
+  @override
+  State<StatefulWidget> createState() =>_{{Mapper .Name}}AddPageState();
+}
+
+class _{{Mapper .Name}}AddPageState extends State<{{Mapper .Name}}AddPage> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  {{range .Columns}}
+   TextEditingController _{{Mapper .Name|UnTitle}}Controller = new TextEditingController();
+  {{end}}
+  // @override
+  Widget appbar([AppModel model]) {
+    return AppBar(title: Text("我的{{Mapper .Name}}"));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+     return Scaffold(
+        appBar: new AppBar(
+          title: Text('登录', style: textStyle14),
+        ),
+        body: Form(
+            key: _formKey,
+            child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                  {{range .Columns}}
+                  TextFormField(
+                  autofocus: true,
+                  controller: _{{Mapper .Name|UnTitle}}Controller,
+                  decoration: InputDecoration(
+                    labelText: '用户名',
+                    hintText: '用户名或邮箱',
+                    icon: Icon(Icons.person)
+                  ),
+                  //校验用户名
+                  validator: (v){
+                    return v
+                        .trim()
+                        .length > 0 ? null : '用户名不能为空';
+                  },
+                ),
+                {{end}}
+                 Padding(
+                  padding: const EdgeInsets.only(top: 28.0),
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                          child: RaisedButton(
+                              padding: EdgeInsets.all(15.0),
+                              child: Text('登录'),
+                              color: Theme.of(context).primaryColor,
+                              textColor: Colors.white,
+                              onPressed: (){
+                                /***
+                                 * 在这里不能通过Form.of(context)的方式获取FormState，context不对
+                                 * 通过_formKey.currentState获取FormState后，
+                                 * 调用validate()方法校验用户名密码是否合法，校验通过后再提交数据
+                                 */
+                                if((_formKey.currentState as FormState).validate()){
+                                  //验证通过提交数据
+                                  //。。。。。
+                                }
+                              }
+                          ),
+                      )
+                    ],
+                  ),
+                )
+
+
+                  ],
+                )
+            ));
+  }
+  
+  @override
+  void initState() {   
+    super.initState();
+  }
+
+  @override
+  void dispose() {   
+    super.dispose();
+  }
+}
+{{end}}
+

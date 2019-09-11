@@ -1,0 +1,8 @@
+lang=go
+genJson=1
+prefix=cos_
+ignoreColumnsJSON=0
+created=
+updated=
+deleted=
+exclude= created_at,updated_at,deleted_at,version

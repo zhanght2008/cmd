@@ -13,5 +13,8 @@ type {{Mapper .Name}} struct {
 {{range .ColumnsSeq}}{{$col := $table.GetColumn .}}	{{Mapper $col.Name}}	{{Type $col}} {{Tag $table $col}}
 {{end}}
 }
+func (c {{Mapper .Name}}) TableName() string {
+	return "{{.Name}}"
+}
 {{end}}
 

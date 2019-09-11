@@ -29,6 +29,9 @@ func (table *Table) Columns() []*Column {
 	return table.columns
 }
 
+func (table *Table) SetColumns(cols []*Column) {
+	table.columns = cols
+}
 func (table *Table) ColumnsSeq() []string {
 	return table.columnsSeq
 }
